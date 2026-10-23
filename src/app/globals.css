@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #fff6e9;
+  --foreground: #3d2b1f;
+  --glow-x: 50%;
+  --glow-y: 40%;
+}
+
+.dark {
+  --background: #120c08;
+  --foreground: #fff6e9;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-frufru-cream: #fff6e9;
+  --color-frufru-ganache: #3d2b1f;
+  --color-frufru-pink: #e8c5c8;
+  --color-frufru-blue: #c2e0f2;
+  --color-frufru-pistachio: #cde3b6;
+  --color-frufru-dark: #120c08;
+  --color-frufru-ganache-deep: #1e1510;
+  --font-caprasimo: var(--font-caprasimo);
+  --font-instrument: var(--font-instrument);
+  --font-bricolage: var(--font-bricolage);
+  --font-sans: var(--font-bricolage);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: #cde3b6;
+  color: #3d2b1f;
+}
+
+.dark::selection {
+  background: #e8c5c8;
+  color: #120c08;
+}
+
+.dark body {
+  background-image: radial-gradient(
+    420px circle at var(--glow-x) var(--glow-y),
+    color-mix(in srgb, #cde3b6 22%, transparent),
+    color-mix(in srgb, #e8c5c8 10%, transparent) 38%,
+    transparent 70%
+  );
+}
+
+.neo-shadow {
+  box-shadow: 4px 4px 0 0 #3d2b1f;
+}
+
+.dark .neo-shadow {
+  box-shadow: 4px 4px 0 0 #e8c5c8;
+}
+
+.neo-press {
+  border: 3px solid #3d2b1f;
+  box-shadow: 4px 4px 0 0 #3d2b1f;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.neo-press:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 #3d2b1f;
+}
+
+.neo-press:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 #3d2b1f;
+}
+
+.dark .neo-press {
+  border-color: #fff6e9;
+  box-shadow: 4px 4px 0 0 #cde3b6;
+}
+
+.dark .neo-press:hover {
+  box-shadow: 2px 2px 0 0 #cde3b6;
+}
+
+.dark .neo-press:active {
+  box-shadow: 0 0 0 0 #cde3b6;
+}
+
+.xp-dots {
+  background-image: radial-gradient(#3d2b1f 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.dark .xp-dots {
+  background-image: radial-gradient(#e8c5c8 1px, transparent 1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .neo-press,
+  .neo-press:hover,
+  .neo-press:active {
+    transition: none;
+    transform: none;
+  }
+}
