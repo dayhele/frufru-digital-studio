@@ -1,123 +1,230 @@
-"use client";
+import {
+  Component,
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+import { ArrowDownRight, Gamepad2, Rotate3D } from 'lucide-react'
+import { Button, buttonClasses } from '@/components/ui/Button'
+import { useInViewport, useNearViewport } from '@/hooks/useNearViewport'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
-import { motion } from "framer-motion";
-import { ArrowDownRight, Sparkles } from "lucide-react";
-import dynamic from "next/dynamic";
-import Image from "next/image";
+// O shell comercial não importa Three: a cena só chega depois do primeiro HTML.
+const HeroArcade = lazy(() => import('@/components/HeroArcade'))
 
-const Cursor3D = dynamic(
-  () => import("@/components/Cursor3D").then((mod) => mod.Cursor3D),
-  { ssr: false },
-);
+export interface HeroInteraction {
+  x: number
+  y: number
+  proximity: number
+  focused: boolean
+  frontal: boolean
+  impulse: number
+  requestFrame: (() => void) | null
+}
 
-export function HeroSection() {
+interface HeroSectionProps {
+  onPlay: () => void
+}
+
+class ArcadeBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode; onUnavailable: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  componentDidCatch() {
+    this.props.onUnavailable()
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children
+  }
+}
+
+function ArcadeFallback({ unavailable = false }: { unavailable?: boolean }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-6 px-6 py-8">
+      <div aria-hidden="true" className="relative w-52 sm:w-60">
+        <div className="rounded-t-2xl border-[3px] border-ink bg-pink px-4 py-3 text-center font-pixel text-[10px] text-ink shadow-brutal">
+          MIAU ORBITAL
+        </div>
+        <div className="border-x-[3px] border-ink bg-cloud px-5 pb-4 pt-5">
+          <div className="grid aspect-[4/3] place-items-center rounded-lg border-[3px] border-ink bg-ink font-pixel text-xl text-butter">
+            PLAY
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-[3px] border-ink bg-butter px-6 py-3">
+          <span className="h-6 w-3 rounded-t-full border-2 border-ink bg-pink" />
+          <span className="flex gap-3">
+            <span className="size-5 rounded-full border-2 border-ink bg-pink" />
+            <span className="size-5 rounded-full border-2 border-ink bg-pistachio" />
+          </span>
+        </div>
+        <div className="mx-3 grid h-24 place-items-center rounded-b-lg border-x-[3px] border-b-[3px] border-ink bg-pink">
+          <span className="h-9 w-7 rounded border-2 border-ink bg-cream p-1.5">
+            <span className="block h-1 w-full bg-ink" />
+          </span>
+        </div>
+        <img
+          src="/brand/mascot.png"
+          alt=""
+          width={422}
+          height={346}
+          decoding="async"
+          className="absolute -right-10 bottom-0 w-32 sm:-right-16 sm:w-40"
+        />
+      </div>
+      {unavailable ? (
+        <p role="status" className="max-w-xs text-center text-sm leading-relaxed text-cream">
+          A cena 3D está indisponível. Você ainda pode jogar pelo botão e explorar o estúdio.
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+export function HeroSection({ onPlay }: HeroSectionProps) {
+  const sceneRef = useRef<HTMLDivElement>(null)
+  const near = useNearViewport(sceneRef, '160px')
+  const visible = useInViewport(sceneRef)
+  const reducedMotion = usePrefersReducedMotion()
+  const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden')
+  const [unavailable, setUnavailable] = useState(false)
+  const interaction = useRef<HeroInteraction>({
+    x: 0,
+    y: 0,
+    proximity: 0,
+    focused: false,
+    frontal: false,
+    impulse: 0,
+    requestFrame: null,
+  })
+
+  useEffect(() => {
+    const onVisibility = () => setPageVisible(document.visibilityState !== 'hidden')
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
+  function boost() {
+    interaction.current.impulse = Math.min(interaction.current.impulse + 0.8, 3)
+    interaction.current.requestFrame?.()
+  }
+
+
   return (
     <section
-      id="inicio"
-      className="relative isolate scroll-mt-24 overflow-hidden px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pt-32"
+      aria-labelledby="hero-title"
+      className="on-dark starfield relative overflow-hidden border-b-[3px] border-ink bg-ink text-cream"
+      onPointerDownCapture={(event) => {
+        boost()
+        if (event.pointerType !== 'mouse') {
+          interaction.current.frontal = true
+        }
+      }}
+      onKeyDownCapture={(event) => {
+        if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) boost()
+      }}
+      onFocusCapture={() => {
+        interaction.current.focused = true
+        boost()
+      }}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          interaction.current.focused = false
+          interaction.current.requestFrame?.()
+        }
+      }}
     >
-      <Cursor3D />
-      <div className="xp-dots pointer-events-none absolute inset-0 opacity-20 dark:opacity-10" />
-
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-5 inline-flex items-center gap-2 border-[3px] border-frufru-ganache bg-frufru-pistachio px-3 py-1 font-bricolage text-xs font-bold uppercase tracking-[0.18em] text-frufru-ganache neo-shadow dark:border-frufru-cream"
+      <div className="mx-auto grid max-w-6xl items-center gap-4 px-5 pb-12 pt-36 sm:px-8 sm:pb-16 sm:pt-40 lg:grid-cols-[1fr_1.05fr] lg:gap-0 lg:pb-20 lg:pt-36">
+        <div className="relative z-10 max-w-xl">
+          <h1
+            id="hero-title"
+            className="text-balance font-display text-[clamp(2rem,10.5vw,4.5rem)] leading-[1.06] tracking-[-0.025em] lg:text-[clamp(3rem,5.5vw,4.5rem)]"
           >
-            <Sparkles className="size-3.5" />
-            estúdio criativo · @frufrudigital
-          </motion.p>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="font-caprasimo max-w-[14ch] text-5xl leading-[0.95] text-frufru-ganache dark:text-frufru-cream sm:text-6xl lg:text-7xl"
-          >
-            design que é fofo, mas{" "}
-            <span className="relative inline-block">
-              entrega.
-              <span className="absolute inset-x-0 -bottom-1 h-3 bg-frufru-pink/80 dark:bg-frufru-pink/40" />
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="font-instrument mt-6 max-w-xl text-xl italic text-frufru-ganache/80 dark:text-frufru-cream/80 sm:text-2xl"
-          >
-            UI/UX, branding e um pouco de caos doce — neobrutalismo pastel
-            com nostalgia de pasta do Windows XP.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="mt-8 flex flex-wrap items-center gap-4"
-          >
-            <a
-              href="#projetos"
-              className="neo-press inline-flex items-center gap-2 bg-frufru-pink px-6 py-3 font-bricolage text-base font-extrabold text-frufru-ganache"
-            >
-              ver os cases
-              <ArrowDownRight className="size-4" />
+            Design com <span className="text-pink">personalidade.</span>
+          </h1>
+          <p className="mt-6 max-w-md text-base leading-relaxed text-cream sm:text-lg">
+            Identidades, embalagens e experiências digitais para marcas que querem ser lembradas.
+            Explore o universo FruFru — e encontre um pouco de diversão pelo caminho.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <a href="#work" className={buttonClasses({ variant: 'pink', size: 'lg' })}>
+              Ver trabalhos <ArrowDownRight size={21} aria-hidden="true" />
             </a>
-            <a
-              href="#contato"
-              className="neo-press inline-flex items-center bg-frufru-blue px-6 py-3 font-bricolage text-base font-extrabold text-frufru-ganache"
-            >
-              manda um oi
-            </a>
-          </motion.div>
+            <Button variant="cream" size="lg" onClick={onPlay}>
+              <Gamepad2 size={21} aria-hidden="true" /> Jogar
+            </Button>
+          </div>
+          <p className="mt-5 text-sm leading-relaxed text-cream">
+            O arcade é opcional. O próximo projeto pode ser o seu.
+          </p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, rotate: -3, y: 18 }}
-          animate={{ opacity: 1, rotate: -2, y: 0 }}
-          transition={{ delay: 0.16 }}
-          className="relative mx-auto w-full max-w-md"
-        >
-          <div className="border-[3px] border-frufru-ganache bg-frufru-blue neo-shadow dark:border-frufru-cream">
-            <div className="flex items-center justify-between border-b-[3px] border-frufru-ganache bg-frufru-pink px-3 py-2 dark:border-frufru-cream">
-              <p className="font-bricolage text-xs font-semibold text-frufru-ganache">
-                gato_espacial.exe
-              </p>
-              <div className="flex gap-1">
-                <span className="size-3 border-2 border-frufru-ganache bg-frufru-cream" />
-                <span className="size-3 border-2 border-frufru-ganache bg-frufru-pistachio" />
-                <span className="size-3 border-2 border-frufru-ganache bg-frufru-pink" />
-              </div>
-            </div>
-            <div className="relative aspect-[6/5] overflow-hidden bg-[#7aa7c4]">
-              <Image
-                src="/brand/mascot-alt.png"
-                alt="Mascote espacial do Frufru Digital Studio"
-                fill
-                sizes="(max-width: 768px) 80vw, 400px"
-                priority
-                className="object-cover"
-              />
-            </div>
-            <div className="border-t-[3px] border-frufru-ganache bg-frufru-cream px-4 py-3 dark:border-frufru-cream dark:bg-frufru-ganache-deep">
-              <p className="font-bricolage text-sm font-medium text-frufru-ganache dark:text-frufru-cream">
-                status:{" "}
-                <span className="font-extrabold">orbitando ideias</span>
-              </p>
-              <p className="font-bricolage mt-1 text-xs font-light text-frufru-ganache/70 dark:text-frufru-cream/70">
-                arraste o cursor — a estrela 3D te segue (desktop)
-              </p>
-            </div>
+        <div className="relative min-w-0">
+          <div
+            ref={sceneRef}
+            className="relative h-[390px] w-full sm:h-[480px] lg:h-[540px]"
+            onPointerMove={(event) => {
+              if (event.pointerType !== 'mouse') return
+              const bounds = event.currentTarget.getBoundingClientRect()
+              const x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
+              const y = ((event.clientY - bounds.top) / bounds.height) * 2 - 1
+              interaction.current.x = x
+              interaction.current.y = y
+              interaction.current.proximity = Math.max(0, 1 - Math.hypot(x + 0.2, y) / 1.2)
+              interaction.current.requestFrame?.()
+            }}
+            onPointerLeave={() => {
+              interaction.current.x = 0
+              interaction.current.y = 0
+              interaction.current.proximity = 0
+              interaction.current.requestFrame?.()
+            }}
+          >
+            {near && !unavailable ? (
+              <ArcadeBoundary
+                fallback={<ArcadeFallback unavailable />}
+                onUnavailable={() => setUnavailable(true)}
+              >
+                <Suspense fallback={<ArcadeFallback />}>
+                  <HeroArcade
+                    active={visible && pageVisible}
+                    reducedMotion={reducedMotion}
+                    interaction={interaction}
+                    onPlay={onPlay}
+                    onUnavailable={() => setUnavailable(true)}
+                  />
+                </Suspense>
+              </ArcadeBoundary>
+            ) : (
+              <ArcadeFallback unavailable={unavailable} />
+            )}
           </div>
-
-          <div className="absolute -bottom-6 -left-4 hidden rotate-[-8deg] border-[3px] border-frufru-ganache bg-frufru-pistachio px-3 py-2 font-bricolage text-xs font-bold text-frufru-ganache neo-shadow dark:border-frufru-cream sm:block">
-            Y2K.exe carregado
-          </div>
-        </motion.div>
+          {!reducedMotion && !unavailable ? (
+            <div className="relative z-10 flex justify-center pt-2">
+              <Button
+                variant="butter"
+                size="sm"
+                onClick={() => {
+                  interaction.current.frontal = true
+                  interaction.current.requestFrame?.()
+                }}
+              >
+                <Rotate3D size={17} aria-hidden="true" />
+                Girar arcade
+              </Button>
+            </div>
+          ) : null}
+        </div>
       </div>
     </section>
-  );
+  )
 }

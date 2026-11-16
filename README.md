@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FruFru Digital Studio
 
-## Getting Started
+Frontend integrado com React, Vite, TypeScript estrito, Tailwind CSS v4 e React Three Fiber.
 
-First, run the development server:
+## Diretório correto
 
-```bash
+`/home/lucca/orca/frufru-digital-studio`
+
+As alterações foram migradas do worktree criado por engano no repositório do portfólio. O portfólio permanece separado, no estado da câmera inclinada.
+
+## Plano e estado da entrega
+
+O plano técnico completo, critérios de aceite, inventário da migração e próximos passos estão em [PLAN.md](./PLAN.md).
+
+**Estado: demonstração funcional, ainda não liberada para publicação comercial.** Hero 3D, arcade, portfólio, ferramentas, artigos, newsletter e contato integrados. Falta conteúdo comercial real, PSDs/ZIPs, endpoint de leads e definição do benefício; o usuário confirmou que esses recursos ainda não existem.
+
+## Comandos
+
+Node.js 22.18+ ou 24+ para Vite e os testes nativos com importação de TypeScript.
+
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run typecheck
+npm run build
+node --test tests/packaging.test.mjs
+npm run preview
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build e três regressões de geometria aprovados. A verificação no Chromium cobriu desktop 1440×900 e mobile 390×844, fluxos do arcade, dobras/SVG, MDX e fallbacks sem WebGL. O bundle Three/R3F é lazy e ainda gera aviso de chunk acima de 500 kB; não foi medida performance em celular físico.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuração de leads
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copie `.env.example` para `.env.local` e configure `VITE_LEADS_ENDPOINT` somente quando houver um serviço real. Sem ele, o formulário informa que nada foi enviado, inclusive em desenvolvimento. Não há simulação de sucesso nem log de dados pessoais.
 
-## Learn More
+Não colocar códigos de desconto, segredos de autenticação ou chaves privilegiadas em variáveis `VITE_*`, que são públicas.
 
-To learn more about Next.js, take a look at the following resources:
+O serviço deve aceitar POST JSON com `kind` (`newsletter`, `reward-claim` ou `project-inquiry`), `email`, `consent`, `submittedAt` e campos opcionais `name`, `message`, `meta`. Precisa permitir a origem do site e o header `Content-Type` via CORS, validar dados/consentimento, controlar abuso e implementar a entrega de e-mails. Resposta HTTP 2xx significa solicitação recebida, não comprovação de e-mail entregue. O teste local exercitou 202, 422 e falha de rede; não comprova integração com um provedor de produção.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Conteúdo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Os cases, números, depoimentos e recursos em `src/lib/cms/mockData.ts` são demonstrações, não resultados comerciais comprovados. Os mockups PSD não foram fornecidos. O plano registra como publicar os arquivos reais e habilitar downloads sem links quebrados.
 
-## Deploy on Vercel
+## Hospedagem estática
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Publique `dist/` após `npm run build`. Configure fallback de rotas de aplicação para `/index.html`, preservando assets existentes: `/insights/:slug` precisa abrir diretamente. O preview do Vite comprovou esse caminho local; o provedor final ainda não foi configurado.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Limites
+
+- O arcade permite `?stage=N` apenas no servidor DEV; o preview de produção ignora o parâmetro. Pontuação no cliente não comprova elegibilidade comercial.
+- Sem benefício aprovado, o claim apenas solicita contato; não promete percentual, código nem envio de e-mail.
+- O SVG usa milímetros e escala 1:1, mas é estudo geométrico sem compensação de espessura. Material, folgas, cola e arte-final exigem aprovação da gráfica.
+- O resultado detalhado e a sequência para publicação estão em `PLAN.md`.

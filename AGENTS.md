@@ -1,9 +1,9 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# FruFru Digital Studio
 
-## This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Este é o repositório de `dayhele/frufru-digital-studio`.
+- Trabalhar em `/home/lucca/orca/frufru-digital-studio`, nunca no repositório `portfolio`.
+- Stack aprovada: React + Vite + TypeScript estrito + Tailwind CSS v4 + React Three Fiber.
+- A migração de Next.js foi iniciada; não reintroduzir App Router, `next/font`, `next/dynamic` ou dependências Next.
+- Ler `PLAN.md` antes de continuar: ele registra o escopo completo, o estado parcial e a sequência de entrega.
+- A implementação migrada ainda não está concluída. Não substituir componentes ausentes por stubs.
+- Preservar os assets oficiais em `public/brand/` e usar os tokens definidos em `src/app/globals.css`.

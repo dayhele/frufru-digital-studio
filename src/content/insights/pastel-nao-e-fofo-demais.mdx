@@ -1,0 +1,39 @@
+Pastel tem fama de cor fraca. A paleta parece educada demais, os botões somem e o cliente pede "mais vida". Quase sempre, o problema não está na cor clara, está no que fica **em cima** dela.
+
+## Cor clara pede tinta escura
+
+Uma paleta pastel funciona como papel. Ela não carrega a hierarquia sozinha; quem faz isso é a tinta. No estúdio, toda a tipografia, borda e sombra sai de um único marrom espresso, `#401708`. Ele substitui o preto e mantém o contraste acima de 7:1 nos cinco fundos claros da paleta. Sobre espresso, a tinta precisa ser clara.
+
+<ColorPalette
+  title="Paleta do estúdio"
+  colors={[
+    { name: 'Creme', hex: '#FFF6E9' },
+    { name: 'Rosa', hex: '#FBC4CE' },
+    { name: 'Pistache', hex: '#D9D273' },
+    { name: 'Manteiga', hex: '#FFF8C7' },
+    { name: 'Nuvem', hex: '#E0EAFF' },
+    { name: 'Espresso', hex: '#401708' },
+  ]}
+/>
+
+Clique em qualquer amostra para copiar o hex. Repare na última linha de cada cartão: os cinco fundos claros passam no nível AAA com espresso por cima; espresso sobre ele mesmo não tem contraste e não deve ser usado para texto.
+
+## O erro mais comum: pastel sobre pastel
+
+Texto cinza-claro em cima de rosa-claro é o que faz o pastel parecer fraco. Compare as duas versões do mesmo cartão de produto arrastando o controle.
+
+<BeforeAfter
+  label="Arraste para comparar o cartão antes e depois do ajuste de contraste"
+  before={<ContrastSample variant="weak" />}
+  after={<ContrastSample variant="strong" />}
+/>
+
+A cor de fundo é a mesma nas duas. Mudaram três coisas: o texto ganhou a tinta inteira, o título ganhou peso e o botão ganhou borda e sombra dura.
+
+> pastel é o papel, não a caneta.
+
+## Três regras que usamos
+
+1. **Uma tinta só.** Um tom escuro para texto, borda e sombra cria unidade e resolve o contraste de uma vez.
+2. **Cor com função.** Rosa chama para a ação, pistache confirma, azul organiza. Se toda cor faz tudo, nenhuma faz nada.
+3. **Borda antes de sombra borrada.** Sombra suave some em fundo claro. Uma borda de 3 px e uma sombra deslocada de 4 px separam os planos sem escurecer a paleta.

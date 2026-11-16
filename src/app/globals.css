@@ -1,122 +1,219 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* ───────────────────────────── Tokens ─────────────────────────────
+   A paleta padrão do Tailwind é desligada de propósito: só existem as
+   cores oficiais do estúdio, então preto puro não entra por acidente. */
+@theme {
+  --color-*: initial;
+  --color-cream: #fff6e9; /* Vanilla Cream — papel */
+  --color-ink: #401708; /* Deep Espresso — texto, bordas, sombras */
+  --color-pink: #fbc4ce; /* Pastel Pink — CTAs */
+  --color-pistachio: #d9d273; /* Retro Pistachio — badges, sucesso */
+  --color-butter: #fff8c7; /* Soft Butter — destaques quentes, estrela */
+  --color-cloud: #e0eaff; /* Cloud Blue — seções alternadas, 3D/tech */
 
-:root {
-  --background: #fff6e9;
-  --foreground: #3d2b1f;
-  --glow-x: 50%;
-  --glow-y: 40%;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Tilt Warp', 'Plus Jakarta Sans Variable', ui-sans-serif, sans-serif;
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  --font-accent: 'Croissant One', Georgia, serif;
+
+  --shadow-*: initial;
+  --shadow-brutal: 4px 4px 0 0 var(--brutal-shadow-color, var(--color-ink));
+  --shadow-brutal-sm: 2px 2px 0 0 var(--brutal-shadow-color, var(--color-ink));
+  --shadow-brutal-lg: 8px 8px 0 0 var(--brutal-shadow-color, var(--color-ink));
+
+  --animate-ticker: ticker 28s linear infinite;
+  --animate-blink: blink 1s steps(2, jump-none) infinite;
+  --animate-credits: credits 26s linear forwards;
+
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+  @keyframes credits {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(-100%);
+    }
+  }
 }
 
-.dark {
-  --background: #120c08;
-  --foreground: #fff6e9;
+/* ───────────────────────────── Base ───────────────────────────── */
+@layer base {
+  html {
+    background: var(--color-ink);
+    scroll-behavior: smooth;
+    scroll-padding-top: 6.5rem;
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--color-ink) var(--color-cream);
+  }
+
+  body {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    caret-color: var(--color-ink);
+    /* Cursor de patinha: ponto ativo no dedo superior esquerdo. */
+    cursor:
+      url('/cursor-patinha.png') 10 4,
+      auto;
+  }
+
+  a,
+  button,
+  summary,
+  select,
+  label[for],
+  [role='button'],
+  input[type='range'],
+  input[type='checkbox'] {
+    cursor:
+      url('/cursor-patinha.png') 10 4,
+      pointer;
+  }
+
+  button:disabled {
+    cursor:
+      url('/cursor-patinha.png') 10 4,
+      not-allowed;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  /* Sobre o espresso, o anel #401708 sumiria: troca para o amarelo-manteiga. */
+  .on-dark :focus-visible,
+  .on-dark:focus-visible {
+    outline-color: var(--color-butter);
+  }
+
+  ::selection {
+    background: var(--color-pistachio);
+    color: var(--color-ink);
+  }
+
+  dialog {
+    color: var(--color-ink);
+  }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-frufru-cream: #fff6e9;
-  --color-frufru-ganache: #3d2b1f;
-  --color-frufru-pink: #e8c5c8;
-  --color-frufru-blue: #c2e0f2;
-  --color-frufru-pistachio: #cde3b6;
-  --color-frufru-dark: #120c08;
-  --color-frufru-ganache-deep: #1e1510;
-  --font-caprasimo: var(--font-caprasimo);
-  --font-instrument: var(--font-instrument);
-  --font-bricolage: var(--font-bricolage);
-  --font-sans: var(--font-bricolage);
+/* Superfícies escuras (hero, modal do jogo): a sombra dura usa rosa para continuar visível. */
+.on-dark {
+  --brutal-shadow-color: var(--color-pink);
 }
 
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
+/* ─────────────────────────── Utilitários ─────────────────────────── */
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-}
-
-::selection {
-  background: #cde3b6;
-  color: #3d2b1f;
-}
-
-.dark::selection {
-  background: #e8c5c8;
-  color: #120c08;
-}
-
-.dark body {
-  background-image: radial-gradient(
-    420px circle at var(--glow-x) var(--glow-y),
-    color-mix(in srgb, #cde3b6 22%, transparent),
-    color-mix(in srgb, #e8c5c8 10%, transparent) 38%,
-    transparent 70%
-  );
-}
-
-.neo-shadow {
-  box-shadow: 4px 4px 0 0 #3d2b1f;
-}
-
-.dark .neo-shadow {
-  box-shadow: 4px 4px 0 0 #e8c5c8;
-}
-
-.neo-press {
-  border: 3px solid #3d2b1f;
-  box-shadow: 4px 4px 0 0 #3d2b1f;
+/* Botão de arcade: afunda 2px no hover e encosta no active. */
+@utility brutal-press {
+  box-shadow: 4px 4px 0 0 var(--brutal-shadow-color, var(--color-ink));
   transition:
-    transform 150ms ease,
-    box-shadow 150ms ease;
+    transform 110ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 110ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--brutal-shadow-color, var(--color-ink));
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--brutal-shadow-color, var(--color-ink));
+  }
 }
 
-.neo-press:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 #3d2b1f;
+/* Versão compacta (botões pequenos e chips): sombra de 2px que some ao pressionar. */
+@utility brutal-press-sm {
+  box-shadow: 2px 2px 0 0 var(--brutal-shadow-color, var(--color-ink));
+  transition:
+    transform 110ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 110ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 0 var(--brutal-shadow-color, var(--color-ink));
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 0 var(--brutal-shadow-color, var(--color-ink));
+  }
 }
 
-.neo-press:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 0 #3d2b1f;
+/* Cartão clicável: mesmo gesto, partindo da sombra de 4px. */
+@utility brutal-card-press {
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--color-ink);
+    }
+  }
+
+  &:focus-within {
+    box-shadow: 2px 2px 0 0 var(--color-ink);
+  }
 }
 
-.dark .neo-press {
-  border-color: #fff6e9;
-  box-shadow: 4px 4px 0 0 #cde3b6;
+@utility pixelated {
+  image-rendering: pixelated;
 }
 
-.dark .neo-press:hover {
-  box-shadow: 2px 2px 0 0 #cde3b6;
+/* Papel pontilhado, bem discreto. */
+@utility paper-dots {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-ink) 14%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
 }
 
-.dark .neo-press:active {
-  box-shadow: 0 0 0 0 #cde3b6;
+/* Campo estrelado em CSS para o esqueleto do hero (antes do WebGL chegar). */
+@utility starfield {
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, var(--color-butter) 50%, transparent 51%),
+    radial-gradient(1px 1px at 31% 68%, var(--color-cloud) 50%, transparent 51%),
+    radial-gradient(2px 2px at 54% 14%, var(--color-pink) 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 44%, var(--color-cream) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 78%, var(--color-butter) 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 84%, var(--color-cream) 50%, transparent 51%),
+    radial-gradient(1px 1px at 44% 90%, var(--color-pistachio) 50%, transparent 51%),
+    radial-gradient(1px 1px at 64% 72%, var(--color-cloud) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 94% 18%, var(--color-cream) 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 46%, var(--color-pink) 50%, transparent 51%);
 }
 
-.xp-dots {
-  background-image: radial-gradient(#3d2b1f 1px, transparent 1px);
-  background-size: 14px 14px;
-}
-
-.dark .xp-dots {
-  background-image: radial-gradient(#e8c5c8 1px, transparent 1px);
-}
-
+/* ─────────────────────── Movimento reduzido ─────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  .neo-press,
-  .neo-press:hover,
-  .neo-press:active {
-    transition: none;
-    transform: none;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
