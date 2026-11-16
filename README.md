@@ -1,4 +1,4 @@
-# FruFru Digital Studio
+# Frufru Digital Studio
 
 Frontend integrado com React, Vite, TypeScript estrito, Tailwind CSS v4 e React Three Fiber.
 
